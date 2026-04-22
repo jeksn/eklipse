@@ -18,6 +18,10 @@ export const hideRelatedSidebar = storage.defineItem<boolean>('sync:hideRelatedS
   fallback: false,
 });
 
+export const redirectChannelToVideos = storage.defineItem<boolean>('sync:redirectChannelToVideos', {
+  fallback: false,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
@@ -30,4 +34,5 @@ export const features: FeatureToggle[] = [
   { key: 'hideShorts', label: 'Hide Shorts', storageItem: hideShorts },
   { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
   { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
+  { key: 'redirectChannelToVideos', label: 'Redirect Channel Home to Videos', storageItem: redirectChannelToVideos },
 ];

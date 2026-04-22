@@ -4,6 +4,7 @@ import {
   hideShorts,
   disableThumbnailAutoplay,
   hideRelatedSidebar,
+  redirectChannelToVideos,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -21,6 +22,7 @@ export default defineContentScript({
       hideShorts: boolean;
       disableThumbnailAutoplay: boolean;
       hideRelatedSidebar: boolean;
+      redirectChannelToVideos: boolean;
     }): string {
       const rules: string[] = [];
 
@@ -78,8 +80,8 @@ export default defineContentScript({
             display: none !important;
           }
           ytd-watch-flexy #primary {
-            max-width: 65% !important;
-            width: 65% !important;
+            max-width: 75% !important;
+            width: 75% !important;
             margin: 0 auto !important;
           }
           ytd-watch-flexy #columns {
@@ -98,6 +100,7 @@ export default defineContentScript({
         hideShorts: await hideShorts.getValue(),
         disableThumbnailAutoplay: await disableThumbnailAutoplay.getValue(),
         hideRelatedSidebar: await hideRelatedSidebar.getValue(),
+        redirectChannelToVideos: await redirectChannelToVideos.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -111,12 +114,32 @@ export default defineContentScript({
       );
     }
 
+    function handleChannelRedirect() {
+      const url = new URL(window.location.href);
+      const pathMatch = url.pathname.match(/^\/(@[^\/]+|channel\/[^\/]+|c\/[^\/]+|user\/[^\/]+)\/?$/);
+      if (pathMatch) {
+        const channelPath = pathMatch[1];
+        if (!url.pathname.endsWith('/videos')) {
+          url.pathname = `/${channelPath}/videos`;
+          window.location.replace(url.toString());
+        }
+      }
+    }
+
     hideHomeFeed.watch(() => applySettings());
     hideComments.watch(() => applySettings());
     hideShorts.watch(() => applySettings());
     disableThumbnailAutoplay.watch(() => applySettings());
     hideRelatedSidebar.watch(() => applySettings());
+    redirectChannelToVideos.watch(() => applySettings());
 
     await applySettings();
+
+    if (await redirectChannelToVideos.getValue()) {
+      handleChannelRedirect();
+    }
+    redirectChannelToVideos.watch((value) => {
+      if (value) handleChannelRedirect();
+    });
   },
 });

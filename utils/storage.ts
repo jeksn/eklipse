@@ -32,12 +32,39 @@ export interface FeatureToggle {
   storageItem: typeof hideHomeFeed;
 }
 
-export const features: FeatureToggle[] = [
-  { key: 'hideHomeFeed', label: 'Hide Home Feed', storageItem: hideHomeFeed },
-  { key: 'hideComments', label: 'Hide Comments', storageItem: hideComments },
-  { key: 'hideShorts', label: 'Hide Shorts', storageItem: hideShorts },
-  { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
-  { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
-  { key: 'redirectChannelToVideos', label: 'Redirect Channel Home to Videos', storageItem: redirectChannelToVideos },
-  { key: 'removeSubscriptions', label: 'Remove Subscriptions', storageItem: removeSubscriptions },
+export interface FeatureGroup {
+  key: string;
+  label: string;
+  features: FeatureToggle[];
+}
+
+export const featureGroups: FeatureGroup[] = [
+  {
+    key: 'home',
+    label: 'Home',
+    features: [
+      { key: 'hideHomeFeed', label: 'Hide Home Feed', storageItem: hideHomeFeed },
+      { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
+    ],
+  },
+  {
+    key: 'global',
+    label: 'Global',
+    features: [
+      { key: 'hideShorts', label: 'Hide Shorts', storageItem: hideShorts },
+      { key: 'redirectChannelToVideos', label: 'Redirect Channel Home to Videos', storageItem: redirectChannelToVideos },
+      { key: 'removeSubscriptions', label: 'Remove Subscriptions', storageItem: removeSubscriptions },
+    ],
+  },
+  {
+    key: 'video',
+    label: 'Video Page',
+    features: [
+      { key: 'hideComments', label: 'Hide Comments', storageItem: hideComments },
+      { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
+    ],
+  },
 ];
+
+// Keep flat features array for backward compatibility
+export const features: FeatureToggle[] = featureGroups.flatMap((g) => g.features);

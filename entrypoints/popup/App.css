@@ -44,3 +44,64 @@
   font-size: 13px;
   color: #e0e0e0;
 }
+
+.tab-selector {
+  margin-bottom: 12px;
+}
+
+/* Radix Select styling overrides */
+[data-radix-select-trigger] {
+  padding-left: 16px !important;
+  padding-right: 12px !important;
+}
+
+[data-radix-select-viewport] [data-radix-select-item] {
+  padding-left: 12px !important;
+  padding-right: 32px !important;
+}
+
+.tab-content {
+  min-height: 120px;
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-label {
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.settings-input {
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #f1f1f1;
+  outline: none;
+}
+
+.settings-input:focus {
+  border-color: #555;
+}
+
+.settings-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-hint {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+}

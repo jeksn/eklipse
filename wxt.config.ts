@@ -2,10 +2,18 @@ import { defineConfig } from 'wxt';
 
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
+  vite: () => ({
+    css: {
+      transformer: 'postcss',
+    },
+    build: {
+      cssMinify: false,
+    },
+  }),
   manifest: {
-    name: 'Eklipse - YouTube Distraction Remover',
+    name: 'Eklipse - YouTube Enhancements',
     short_name: 'Eklipse',
-    description: 'Hide YouTube home feed, comments, shorts, and disable thumbnail autoplay',
+    description: 'A YouTube extension that removes distractions and enhances your YouTube experience.',
     version: '0.1.0',
     permissions: ['storage'],
     host_permissions: ['*://*.youtube.com/*'],

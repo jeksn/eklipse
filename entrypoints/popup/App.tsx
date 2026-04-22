@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { features, type FeatureToggle } from '@/utils/storage';
+import { Switch } from '@/components/ui/switch';
 import './App.css';
 
 function Toggle({ feature }: { feature: FeatureToggle }) {
@@ -26,15 +27,11 @@ function Toggle({ feature }: { feature: FeatureToggle }) {
   return (
     <div className="toggle-row">
       <span className="toggle-label">{feature.label}</span>
-      <button
-        className={`toggle-switch ${enabled ? 'on' : ''} ${loading ? 'loading' : ''}`}
-        onClick={toggle}
+      <Switch
+        checked={enabled}
+        onCheckedChange={toggle}
         disabled={loading}
-        role="switch"
-        aria-checked={enabled}
-      >
-        <span className="toggle-knob" />
-      </button>
+      />
     </div>
   );
 }
@@ -43,6 +40,7 @@ function App() {
   return (
     <div className="popup">
       <header className="popup-header">
+        <img src="/eklipse.svg" alt="Eklipse" className="popup-icon" />
         <h1>Eklipse</h1>
       </header>
       <div className="toggles">

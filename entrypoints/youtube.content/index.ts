@@ -5,6 +5,7 @@ import {
   disableThumbnailAutoplay,
   hideRelatedSidebar,
   redirectChannelToVideos,
+  removeSubscriptions,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -23,6 +24,7 @@ export default defineContentScript({
       disableThumbnailAutoplay: boolean;
       hideRelatedSidebar: boolean;
       redirectChannelToVideos: boolean;
+      removeSubscriptions: boolean;
     }): string {
       const rules: string[] = [];
 
@@ -90,6 +92,18 @@ export default defineContentScript({
         `);
       }
 
+      if (settings.removeSubscriptions) {
+        rules.push(`
+          a[href="/feed/subscriptions"],
+          ytd-guide-entry-renderer a[href="/feed/subscriptions"],
+          ytd-mini-guide-entry-renderer a[href="/feed/subscriptions"],
+          ytd-guide-entry-renderer:has(a[href="/feed/subscriptions"]),
+          ytd-mini-guide-entry-renderer:has(a[href="/feed/subscriptions"]) {
+            display: none !important;
+          }
+        `);
+      }
+
       return rules.join('\n');
     }
 
@@ -101,6 +115,7 @@ export default defineContentScript({
         disableThumbnailAutoplay: await disableThumbnailAutoplay.getValue(),
         hideRelatedSidebar: await hideRelatedSidebar.getValue(),
         redirectChannelToVideos: await redirectChannelToVideos.getValue(),
+        removeSubscriptions: await removeSubscriptions.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -126,12 +141,21 @@ export default defineContentScript({
       }
     }
 
+    function handleSubscriptionsRedirect() {
+      const url = new URL(window.location.href);
+      if (url.pathname === '/feed/subscriptions') {
+        url.pathname = '/';
+        window.location.replace(url.toString());
+      }
+    }
+
     hideHomeFeed.watch(() => applySettings());
     hideComments.watch(() => applySettings());
     hideShorts.watch(() => applySettings());
     disableThumbnailAutoplay.watch(() => applySettings());
     hideRelatedSidebar.watch(() => applySettings());
     redirectChannelToVideos.watch(() => applySettings());
+    removeSubscriptions.watch(() => applySettings());
 
     await applySettings();
 
@@ -140,6 +164,13 @@ export default defineContentScript({
     }
     redirectChannelToVideos.watch((value) => {
       if (value) handleChannelRedirect();
+    });
+
+    if (await removeSubscriptions.getValue()) {
+      handleSubscriptionsRedirect();
+    }
+    removeSubscriptions.watch((value) => {
+      if (value) handleSubscriptionsRedirect();
     });
   },
 });

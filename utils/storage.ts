@@ -22,6 +22,10 @@ export const redirectChannelToVideos = storage.defineItem<boolean>('sync:redirec
   fallback: false,
 });
 
+export const removeSubscriptions = storage.defineItem<boolean>('sync:removeSubscriptions', {
+  fallback: false,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
@@ -35,4 +39,5 @@ export const features: FeatureToggle[] = [
   { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
   { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
   { key: 'redirectChannelToVideos', label: 'Redirect Channel Home to Videos', storageItem: redirectChannelToVideos },
+  { key: 'removeSubscriptions', label: 'Remove Subscriptions', storageItem: removeSubscriptions },
 ];

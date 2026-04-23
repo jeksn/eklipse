@@ -13,7 +13,7 @@ export default defineConfig({
   manifest: {
     name: 'Eklipse - YouTube Enhancements',
     short_name: 'Eklipse',
-    description: 'A YouTube extension that removes distractions and enhances your YouTube experience.',
+    description: 'A web extension that removes distractions and enhances your YouTube experience.',
     version: '0.1.0',
     permissions: ['storage'],
     host_permissions: ['*://*.youtube.com/*'],

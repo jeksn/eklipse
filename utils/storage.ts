@@ -26,6 +26,14 @@ export const removeSubscriptions = storage.defineItem<boolean>('sync:removeSubsc
   fallback: false,
 });
 
+export const hideEndScreenCards = storage.defineItem<boolean>('sync:hideEndScreenCards', {
+  fallback: false,
+});
+
+export const hideCreatorElements = storage.defineItem<boolean>('sync:hideCreatorElements', {
+  fallback: false,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
@@ -62,6 +70,8 @@ export const featureGroups: FeatureGroup[] = [
     features: [
       { key: 'hideComments', label: 'Hide Comments', storageItem: hideComments },
       { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
+      { key: 'hideEndScreenCards', label: 'Hide End Screen Cards', storageItem: hideEndScreenCards },
+      { key: 'hideCreatorElements', label: 'Hide Creator Endscreen Elements', storageItem: hideCreatorElements },
     ],
   },
 ];

@@ -6,6 +6,8 @@ import {
   hideRelatedSidebar,
   redirectChannelToVideos,
   removeSubscriptions,
+  hideEndScreenCards,
+  hideCreatorElements,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -25,6 +27,8 @@ export default defineContentScript({
       hideRelatedSidebar: boolean;
       redirectChannelToVideos: boolean;
       removeSubscriptions: boolean;
+      hideEndScreenCards: boolean;
+      hideCreatorElements: boolean;
     }): string {
       const rules: string[] = [];
 
@@ -104,6 +108,23 @@ export default defineContentScript({
         `);
       }
 
+      if (settings.hideEndScreenCards) {
+        rules.push(`
+          .ytp-suggestion-set {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideCreatorElements) {
+        rules.push(`
+          .ytp-ce-element,
+          .ytp-ce-element-show {
+            display: none !important;
+          }
+        `);
+      }
+
       return rules.join('\n');
     }
 
@@ -116,6 +137,8 @@ export default defineContentScript({
         hideRelatedSidebar: await hideRelatedSidebar.getValue(),
         redirectChannelToVideos: await redirectChannelToVideos.getValue(),
         removeSubscriptions: await removeSubscriptions.getValue(),
+        hideEndScreenCards: await hideEndScreenCards.getValue(),
+        hideCreatorElements: await hideCreatorElements.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -156,6 +179,8 @@ export default defineContentScript({
     hideRelatedSidebar.watch(() => applySettings());
     redirectChannelToVideos.watch(() => applySettings());
     removeSubscriptions.watch(() => applySettings());
+    hideEndScreenCards.watch(() => applySettings());
+    hideCreatorElements.watch(() => applySettings());
 
     await applySettings();
 

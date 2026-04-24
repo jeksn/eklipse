@@ -42,6 +42,10 @@ export const hideCreatorElements = storage.defineItem<boolean>('sync:hideCreator
   fallback: false,
 });
 
+export const hideAISummary = storage.defineItem<boolean>('sync:hideAISummary', {
+  fallback: false,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
@@ -78,6 +82,13 @@ export const featureGroups: FeatureGroup[] = [
     features: [
       { key: 'redirectChannelToVideos', label: 'Redirect Channel Home to Videos', storageItem: redirectChannelToVideos },
       { key: 'removeSubscriptions', label: 'Remove Subscriptions', storageItem: removeSubscriptions },
+    ],
+  },
+  {
+    key: 'ai',
+    label: 'AI',
+    features: [
+      { key: 'hideAISummary', label: 'Hide AI Summary', storageItem: hideAISummary },
     ],
   },
   {

@@ -10,6 +10,7 @@ import {
   removeSubscriptions,
   hideEndScreenCards,
   hideCreatorElements,
+  hideAISummary,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -33,6 +34,7 @@ export default defineContentScript({
       removeSubscriptions: boolean;
       hideEndScreenCards: boolean;
       hideCreatorElements: boolean;
+      hideAISummary: boolean;
     }): string {
       const rules: string[] = [];
 
@@ -129,6 +131,14 @@ export default defineContentScript({
         `);
       }
 
+      if (settings.hideAISummary) {
+        rules.push(`
+          #video-summary {
+            display: none !important;
+          }
+        `);
+      }
+
       return rules.join('\n');
     }
 
@@ -145,6 +155,7 @@ export default defineContentScript({
         removeSubscriptions: await removeSubscriptions.getValue(),
         hideEndScreenCards: await hideEndScreenCards.getValue(),
         hideCreatorElements: await hideCreatorElements.getValue(),
+        hideAISummary: await hideAISummary.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -208,6 +219,7 @@ export default defineContentScript({
     removeSubscriptions.watch(() => applySettings());
     hideEndScreenCards.watch(() => applySettings());
     hideCreatorElements.watch(() => applySettings());
+    hideAISummary.watch(() => applySettings());
 
     await applySettings();
 

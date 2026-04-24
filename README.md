@@ -1,13 +1,30 @@
 # Eklipse
 
-A browser extension that helps you focus on YouTube by hiding distractions.
+A browser extension that strips away distractions and puts you back in control of your YouTube experience.
 
 ## Features
 
-- Hide YouTube home feed
-- Hide comments section
-- Hide Shorts
-- Disable thumbnail autoplay
+### Home
+- **Hide Home Feed** — Remove the algorithmic feed entirely so you only watch what you came for
+- **Disable Thumbnail Autoplay** — Stop thumbnails from autoplaying video previews on hover
+
+### Shorts
+- **Disable Shorts** — Completely remove all Shorts UI and redirect `/shorts/` URLs to the homepage
+- **Hide Recommended Shorts** — Remove Shorts shelves and recommendations from feeds
+- **Play Shorts in Native Player** — Automatically redirect Shorts to the standard video player
+
+### AI
+- **Hide AI Summary** — Remove YouTube's AI-generated video summaries
+
+### Global
+- **Redirect Channel Home to Videos** — Skip the channel homepage and go straight to their videos tab
+- **Remove Subscriptions** — Hide the subscriptions feed entry from the sidebar
+
+### Video Page
+- **Hide Comments** — Remove the comments section from video pages
+- **Hide Related Sidebar** — Remove the recommended videos sidebar for a distraction-free viewing experience
+- **Hide End Screen Cards** — Remove suggestion overlays that appear at the end of videos
+- **Hide Creator Endscreen Elements** — Remove creator-added endscreen cards and overlays
 
 ## Development
 

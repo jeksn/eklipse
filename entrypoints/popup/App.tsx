@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import './App.css';
 
-type TabKey = 'home' | 'global' | 'video' | 'settings';
+type TabKey = 'home' | 'shorts' | 'global' | 'video' | 'settings';
 
 interface Tab {
   key: TabKey;
@@ -19,6 +19,7 @@ interface Tab {
 
 const tabs: Tab[] = [
   { key: 'home', label: 'Home' },
+  { key: 'shorts', label: 'Shorts' },
   { key: 'global', label: 'Global' },
   { key: 'video', label: 'Video Page' },
   { key: 'settings', label: 'Settings' },

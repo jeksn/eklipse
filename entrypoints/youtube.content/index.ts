@@ -1,7 +1,9 @@
 import {
   hideHomeFeed,
   hideComments,
-  hideShorts,
+  disableShorts,
+  hideRecommendedShorts,
+  playShortsInNativePlayer,
   disableThumbnailAutoplay,
   hideRelatedSidebar,
   redirectChannelToVideos,
@@ -22,7 +24,9 @@ export default defineContentScript({
     function buildCSS(settings: {
       hideHomeFeed: boolean;
       hideComments: boolean;
-      hideShorts: boolean;
+      disableShorts: boolean;
+      hideRecommendedShorts: boolean;
+      playShortsInNativePlayer: boolean;
       disableThumbnailAutoplay: boolean;
       hideRelatedSidebar: boolean;
       redirectChannelToVideos: boolean;
@@ -52,7 +56,7 @@ export default defineContentScript({
         `);
       }
 
-      if (settings.hideShorts) {
+      if (settings.disableShorts || settings.hideRecommendedShorts) {
         rules.push(`
           ytd-rich-section-renderer,
           ytd-reel-shelf-renderer,
@@ -132,7 +136,9 @@ export default defineContentScript({
       const settings = {
         hideHomeFeed: await hideHomeFeed.getValue(),
         hideComments: await hideComments.getValue(),
-        hideShorts: await hideShorts.getValue(),
+        disableShorts: await disableShorts.getValue(),
+        hideRecommendedShorts: await hideRecommendedShorts.getValue(),
+        playShortsInNativePlayer: await playShortsInNativePlayer.getValue(),
         disableThumbnailAutoplay: await disableThumbnailAutoplay.getValue(),
         hideRelatedSidebar: await hideRelatedSidebar.getValue(),
         redirectChannelToVideos: await redirectChannelToVideos.getValue(),
@@ -164,6 +170,25 @@ export default defineContentScript({
       }
     }
 
+    function handleDisableShortsRedirect() {
+      const url = new URL(window.location.href);
+      const shortsMatch = url.pathname.match(/^\/shorts\/(.+)$/);
+      if (shortsMatch) {
+        window.location.replace('https://www.youtube.com/');
+      }
+    }
+
+    function handleShortsToNativePlayer() {
+      const url = new URL(window.location.href);
+      const shortsMatch = url.pathname.match(/^\/shorts\/(.+)$/);
+      if (shortsMatch) {
+        const videoId = shortsMatch[1];
+        url.pathname = '/watch';
+        url.searchParams.set('v', videoId);
+        window.location.replace(url.toString());
+      }
+    }
+
     function handleSubscriptionsRedirect() {
       const url = new URL(window.location.href);
       if (url.pathname === '/feed/subscriptions') {
@@ -174,7 +199,9 @@ export default defineContentScript({
 
     hideHomeFeed.watch(() => applySettings());
     hideComments.watch(() => applySettings());
-    hideShorts.watch(() => applySettings());
+    disableShorts.watch(() => applySettings());
+    hideRecommendedShorts.watch(() => applySettings());
+    playShortsInNativePlayer.watch(() => applySettings());
     disableThumbnailAutoplay.watch(() => applySettings());
     hideRelatedSidebar.watch(() => applySettings());
     redirectChannelToVideos.watch(() => applySettings());
@@ -183,6 +210,18 @@ export default defineContentScript({
     hideCreatorElements.watch(() => applySettings());
 
     await applySettings();
+
+    if (await disableShorts.getValue()) {
+      handleDisableShortsRedirect();
+    } else if (await playShortsInNativePlayer.getValue()) {
+      handleShortsToNativePlayer();
+    }
+    disableShorts.watch((value: boolean) => {
+      if (value) handleDisableShortsRedirect();
+    });
+    playShortsInNativePlayer.watch(async (value: boolean) => {
+      if (value && !(await disableShorts.getValue())) handleShortsToNativePlayer();
+    });
 
     if (await redirectChannelToVideos.getValue()) {
       handleChannelRedirect();

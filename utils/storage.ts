@@ -6,7 +6,15 @@ export const hideComments = storage.defineItem<boolean>('sync:hideComments', {
   fallback: false,
 });
 
-export const hideShorts = storage.defineItem<boolean>('sync:hideShorts', {
+export const disableShorts = storage.defineItem<boolean>('sync:disableShorts', {
+  fallback: false,
+});
+
+export const hideRecommendedShorts = storage.defineItem<boolean>('sync:hideRecommendedShorts', {
+  fallback: false,
+});
+
+export const playShortsInNativePlayer = storage.defineItem<boolean>('sync:playShortsInNativePlayer', {
   fallback: false,
 });
 
@@ -56,10 +64,18 @@ export const featureGroups: FeatureGroup[] = [
     ],
   },
   {
+    key: 'shorts',
+    label: 'Shorts',
+    features: [
+      { key: 'disableShorts', label: 'Disable Shorts', storageItem: disableShorts },
+      { key: 'hideRecommendedShorts', label: 'Hide Recommended Shorts', storageItem: hideRecommendedShorts },
+      { key: 'playShortsInNativePlayer', label: 'Play Shorts in Native Player', storageItem: playShortsInNativePlayer },
+    ],
+  },
+  {
     key: 'global',
     label: 'Global',
     features: [
-      { key: 'hideShorts', label: 'Hide Shorts', storageItem: hideShorts },
       { key: 'redirectChannelToVideos', label: 'Redirect Channel Home to Videos', storageItem: redirectChannelToVideos },
       { key: 'removeSubscriptions', label: 'Remove Subscriptions', storageItem: removeSubscriptions },
     ],

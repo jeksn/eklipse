@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { featureGroups, type FeatureToggle, type FeatureGroup } from '@/utils/storage';
+import { featureGroups, type FeatureToggle, type FeatureGroup, type NumericFeatureToggle } from '@/utils/storage';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -59,11 +59,55 @@ function Toggle({ feature }: { feature: FeatureToggle }) {
   );
 }
 
+function NumericSelect({ feature }: { feature: NumericFeatureToggle }) {
+  const [value, setValue] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    feature.storageItem.getValue().then((val) => {
+      setValue(val);
+      setLoading(false);
+    });
+    const unwatch = feature.storageItem.watch((newVal) => {
+      setValue(newVal);
+    });
+    return unwatch;
+  }, [feature]);
+
+  const handleChange = async (newValue: string) => {
+    const numValue = parseInt(newValue, 10);
+    setValue(numValue);
+    await feature.storageItem.setValue(numValue);
+  };
+
+  return (
+    <div className="toggle-row">
+      <span className="toggle-label">{feature.label}</span>
+      <Select value={value.toString()} onValueChange={handleChange} disabled={loading}>
+        <SelectTrigger className="w-24">
+          <SelectValue placeholder="Select" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="0">Unlimited</SelectItem>
+          {feature.options.filter(o => o > 0).map((opt) => (
+            <SelectItem key={opt} value={opt.toString()}>
+              {opt}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 function FeatureList({ group }: { group: FeatureGroup }) {
   return (
     <div className="toggles">
       {group.features.map((f) => (
         <Toggle key={f.key} feature={f} />
+      ))}
+      {group.numericFeatures?.map((f) => (
+        <NumericSelect key={f.key} feature={f} />
       ))}
     </div>
   );

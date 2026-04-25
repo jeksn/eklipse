@@ -46,16 +46,28 @@ export const hideAISummary = storage.defineItem<boolean>('sync:hideAISummary', {
   fallback: false,
 });
 
+export const homeFeedLimit = storage.defineItem<number>('sync:homeFeedLimit', {
+  fallback: 0,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
   storageItem: typeof hideHomeFeed;
 }
 
+export interface NumericFeatureToggle {
+  key: string;
+  label: string;
+  storageItem: typeof homeFeedLimit;
+  options: number[];
+}
+
 export interface FeatureGroup {
   key: string;
   label: string;
   features: FeatureToggle[];
+  numericFeatures?: NumericFeatureToggle[];
 }
 
 export const featureGroups: FeatureGroup[] = [
@@ -65,6 +77,9 @@ export const featureGroups: FeatureGroup[] = [
     features: [
       { key: 'hideHomeFeed', label: 'Hide Home Feed', storageItem: hideHomeFeed },
       { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
+    ],
+    numericFeatures: [
+      { key: 'homeFeedLimit', label: 'Home Feed Limit', storageItem: homeFeedLimit, options: [0, 8, 12, 16, 24] },
     ],
   },
   {

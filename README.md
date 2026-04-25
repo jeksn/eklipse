@@ -6,6 +6,7 @@ A browser extension that strips away distractions and puts you back in control o
 
 ### Home
 - **Hide Home Feed** — Remove the algorithmic feed entirely so you only watch what you came for
+- **Home Feed Limit** — Limit the number of recommendations on the home page (8, 12, 16, or 24 items)
 - **Disable Thumbnail Autoplay** — Stop thumbnails from autoplaying video previews on hover
 
 ### Shorts

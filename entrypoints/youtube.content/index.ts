@@ -11,6 +11,7 @@ import {
   hideEndScreenCards,
   hideCreatorElements,
   hideAISummary,
+  homeFeedLimit,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -35,6 +36,7 @@ export default defineContentScript({
       hideEndScreenCards: boolean;
       hideCreatorElements: boolean;
       hideAISummary: boolean;
+      homeFeedLimit: number;
     }): string {
       const rules: string[] = [];
 
@@ -139,6 +141,14 @@ export default defineContentScript({
         `);
       }
 
+      if (settings.homeFeedLimit > 0) {
+        rules.push(`
+          ytd-browse[page-subtype="home"] ytd-rich-grid-renderer ytd-rich-item-renderer:nth-child(n+${settings.homeFeedLimit + 3}) {
+            display: none !important;
+          }
+        `);
+      }
+
       return rules.join('\n');
     }
 
@@ -156,6 +166,7 @@ export default defineContentScript({
         hideEndScreenCards: await hideEndScreenCards.getValue(),
         hideCreatorElements: await hideCreatorElements.getValue(),
         hideAISummary: await hideAISummary.getValue(),
+        homeFeedLimit: await homeFeedLimit.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -220,6 +231,7 @@ export default defineContentScript({
     hideEndScreenCards.watch(() => applySettings());
     hideCreatorElements.watch(() => applySettings());
     hideAISummary.watch(() => applySettings());
+    homeFeedLimit.watch(() => applySettings());
 
     await applySettings();
 

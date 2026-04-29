@@ -12,6 +12,8 @@ import {
   hideCreatorElements,
   hideAISummary,
   homeFeedLimit,
+  hideMixes,
+  hideRecommendedCategories,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -37,6 +39,8 @@ export default defineContentScript({
       hideCreatorElements: boolean;
       hideAISummary: boolean;
       homeFeedLimit: number;
+      hideMixes: boolean;
+      hideRecommendedCategories: boolean;
     }): string {
       const rules: string[] = [];
 
@@ -149,6 +153,30 @@ export default defineContentScript({
         `);
       }
 
+      if (settings.hideMixes) {
+        rules.push(`
+          ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(a[href*="list=RD"]),
+          ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(a[href*="list=WL"]),
+          ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(ytd-thumbnail-overlay-side-panel-renderer),
+          ytd-browse[page-subtype="home"] ytd-compact-video-renderer:has(a[href*="list=RD"]),
+          ytd-browse[page-subtype="home"] ytd-compact-video-renderer:has(a[href*="list=WL"]) {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideRecommendedCategories) {
+        rules.push(`
+          ytd-browse[page-subtype="home"] ytd-feed-nudge-renderer,
+          ytd-browse[page-subtype="home"] ytd-rich-shelf-renderer:has(ytd-rich-chip-cloud-renderer),
+          ytd-browse[page-subtype="home"] ytd-rich-section-renderer:has(ytd-rich-shelf-renderer),
+          ytd-browse[page-subtype="home"] ytd-chip-cloud-renderer,
+          ytd-browse[page-subtype="home"] #chips-wrapper {
+            display: none !important;
+          }
+        `);
+      }
+
       return rules.join('\n');
     }
 
@@ -167,6 +195,8 @@ export default defineContentScript({
         hideCreatorElements: await hideCreatorElements.getValue(),
         hideAISummary: await hideAISummary.getValue(),
         homeFeedLimit: await homeFeedLimit.getValue(),
+        hideMixes: await hideMixes.getValue(),
+        hideRecommendedCategories: await hideRecommendedCategories.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -232,6 +262,8 @@ export default defineContentScript({
     hideCreatorElements.watch(() => applySettings());
     hideAISummary.watch(() => applySettings());
     homeFeedLimit.watch(() => applySettings());
+    hideMixes.watch(() => applySettings());
+    hideRecommendedCategories.watch(() => applySettings());
 
     await applySettings();
 

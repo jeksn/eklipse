@@ -50,6 +50,14 @@ export const homeFeedLimit = storage.defineItem<number>('sync:homeFeedLimit', {
   fallback: 0,
 });
 
+export const hideMixes = storage.defineItem<boolean>('sync:hideMixes', {
+  fallback: false,
+});
+
+export const hideRecommendedCategories = storage.defineItem<boolean>('sync:hideRecommendedCategories', {
+  fallback: false,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
@@ -77,6 +85,8 @@ export const featureGroups: FeatureGroup[] = [
     features: [
       { key: 'hideHomeFeed', label: 'Hide Home Feed', storageItem: hideHomeFeed },
       { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
+      { key: 'hideMixes', label: 'Hide Mixes', storageItem: hideMixes },
+      { key: 'hideRecommendedCategories', label: 'Hide Recommended Categories', storageItem: hideRecommendedCategories },
     ],
     numericFeatures: [
       { key: 'homeFeedLimit', label: 'Home Feed Limit', storageItem: homeFeedLimit, options: [0, 8, 12, 16, 24] },

@@ -2,7 +2,7 @@
   "name": "eklipse",
   "description": "Hide YouTube home feed, comments, shorts, and disable thumbnail autoplay",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",

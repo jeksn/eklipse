@@ -14,7 +14,6 @@ export default defineConfig({
     name: 'Eklipse - YouTube Enhancements',
     short_name: 'Eklipse',
     description: 'A web extension that removes distractions and enhances your YouTube experience.',
-    version: '0.1.0',
     permissions: ['storage'],
     host_permissions: ['*://*.youtube.com/*'],
     action: {

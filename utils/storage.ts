@@ -10,10 +10,6 @@ export const disableShorts = storage.defineItem<boolean>('sync:disableShorts', {
   fallback: false,
 });
 
-export const hideRecommendedShorts = storage.defineItem<boolean>('sync:hideRecommendedShorts', {
-  fallback: false,
-});
-
 export const playShortsInNativePlayer = storage.defineItem<boolean>('sync:playShortsInNativePlayer', {
   fallback: false,
 });
@@ -97,7 +93,6 @@ export const featureGroups: FeatureGroup[] = [
     label: 'Shorts',
     features: [
       { key: 'disableShorts', label: 'Disable Shorts', storageItem: disableShorts },
-      { key: 'hideRecommendedShorts', label: 'Hide Recommended Shorts', storageItem: hideRecommendedShorts },
       { key: 'playShortsInNativePlayer', label: 'Play Shorts in Native Player', storageItem: playShortsInNativePlayer },
     ],
   },

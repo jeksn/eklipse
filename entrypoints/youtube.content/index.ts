@@ -269,7 +269,7 @@ export default defineContentScript({
 
       if (settings.hideShareButton) {
         rules.push(`
-          ytd-menu-renderer #top-level-buttons-computed yt-button-view-model:has(button[aria-label="Share"]) {
+          ytd-menu-renderer div#top-level-buttons-computed > yt-button-view-model:has(button[aria-label="Share"]) {
             display: none !important;
           }
         `);
@@ -277,8 +277,7 @@ export default defineContentScript({
 
       if (settings.hideDownloadButton) {
         rules.push(`
-          ytd-menu-renderer #flexible-item-buttons ytd-download-button-renderer,
-          #below ytd-download-button-renderer {
+          ytd-menu-renderer div#flexible-item-buttons > ytd-download-button-renderer {
             display: none !important;
           }
         `);
@@ -286,7 +285,7 @@ export default defineContentScript({
 
       if (settings.hideClipButton) {
         rules.push(`
-          ytd-menu-renderer #flexible-item-buttons yt-button-view-model:has(button[aria-label="Clip"]) {
+          ytd-menu-renderer div#flexible-item-buttons > yt-button-view-model:has(button[aria-label="Clip"]) {
             display: none !important;
           }
         `);
@@ -294,7 +293,7 @@ export default defineContentScript({
 
       if (settings.hideSaveButton) {
         rules.push(`
-          ytd-menu-renderer #flexible-item-buttons yt-button-view-model:has(button[aria-label="Save to playlist"]) {
+          ytd-menu-renderer div#flexible-item-buttons > yt-button-view-model:has(button[aria-label="Save to playlist"]) {
             display: none !important;
           }
         `);
@@ -302,7 +301,7 @@ export default defineContentScript({
 
       if (settings.hideThanksButton) {
         rules.push(`
-          ytd-menu-renderer #flexible-item-buttons yt-button-view-model:has(button[aria-label="Thanks"]) {
+          ytd-menu-renderer div#flexible-item-buttons > yt-button-view-model:has(button[aria-label="Thanks"]) {
             display: none !important;
           }
         `);

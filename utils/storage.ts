@@ -103,11 +103,17 @@ export interface NumericFeatureToggle {
   options: number[];
 }
 
+export interface FeatureSubgroup {
+  label: string;
+  features: FeatureToggle[];
+}
+
 export interface FeatureGroup {
   key: string;
   label: string;
   features: FeatureToggle[];
   numericFeatures?: NumericFeatureToggle[];
+  subgroups?: FeatureSubgroup[];
 }
 
 export const featureGroups: FeatureGroup[] = [
@@ -150,20 +156,36 @@ export const featureGroups: FeatureGroup[] = [
   {
     key: 'video',
     label: 'Video Page',
-    features: [
-      { key: 'hideDescription', label: 'Hide Description', storageItem: hideDescription },
-      { key: 'hideLikeDislike', label: 'Hide Like / Dislike', storageItem: hideLikeDislike },
-      { key: 'hideSubscribeButton', label: 'Hide Subscribe Button', storageItem: hideSubscribeButton },
-      { key: 'hideShareButton', label: 'Hide Share Button', storageItem: hideShareButton },
-      { key: 'hideDownloadButton', label: 'Hide Download Button', storageItem: hideDownloadButton },
-      { key: 'hideClipButton', label: 'Hide Clip Button', storageItem: hideClipButton },
-      { key: 'hideSaveButton', label: 'Hide Save Button', storageItem: hideSaveButton },
-      { key: 'hideThanksButton', label: 'Hide Thanks Button', storageItem: hideThanksButton },
-      { key: 'hideInfoCards', label: 'Hide Info Cards', storageItem: hideInfoCards },
-      { key: 'hideComments', label: 'Hide Comments', storageItem: hideComments },
-      { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
-      { key: 'hideEndScreenCards', label: 'Hide End Screen Cards', storageItem: hideEndScreenCards },
-      { key: 'hideCreatorElements', label: 'Hide Creator Endscreen Elements', storageItem: hideCreatorElements },
+    features: [],
+    subgroups: [
+      {
+        label: 'Buttons',
+        features: [
+          { key: 'hideLikeDislike', label: 'Like / Dislike', storageItem: hideLikeDislike },
+          { key: 'hideSubscribeButton', label: 'Subscribe', storageItem: hideSubscribeButton },
+          { key: 'hideShareButton', label: 'Share', storageItem: hideShareButton },
+          { key: 'hideDownloadButton', label: 'Download', storageItem: hideDownloadButton },
+          { key: 'hideClipButton', label: 'Clip', storageItem: hideClipButton },
+          { key: 'hideSaveButton', label: 'Save', storageItem: hideSaveButton },
+          { key: 'hideThanksButton', label: 'Thanks', storageItem: hideThanksButton },
+        ],
+      },
+      {
+        label: 'Content',
+        features: [
+          { key: 'hideDescription', label: 'Description', storageItem: hideDescription },
+          { key: 'hideComments', label: 'Comments', storageItem: hideComments },
+          { key: 'hideRelatedSidebar', label: 'Related Sidebar', storageItem: hideRelatedSidebar },
+        ],
+      },
+      {
+        label: 'Player',
+        features: [
+          { key: 'hideInfoCards', label: 'Info Cards', storageItem: hideInfoCards },
+          { key: 'hideEndScreenCards', label: 'End Screen Cards', storageItem: hideEndScreenCards },
+          { key: 'hideCreatorElements', label: 'Creator Endscreen', storageItem: hideCreatorElements },
+        ],
+      },
     ],
   },
 ];

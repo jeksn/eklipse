@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { featureGroups, type FeatureToggle, type FeatureGroup, type NumericFeatureToggle } from '@/utils/storage';
+import { featureGroups, type FeatureToggle, type FeatureGroup, type NumericFeatureToggle, type FeatureSubgroup } from '@/utils/storage';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -100,6 +100,17 @@ function NumericSelect({ feature }: { feature: NumericFeatureToggle }) {
   );
 }
 
+function Subgroup({ subgroup }: { subgroup: FeatureSubgroup }) {
+  return (
+    <div className="subgroup">
+      <div className="subgroup-header">{subgroup.label}</div>
+      {subgroup.features.map((f) => (
+        <Toggle key={f.key} feature={f} />
+      ))}
+    </div>
+  );
+}
+
 function FeatureList({ group }: { group: FeatureGroup }) {
   return (
     <div className="toggles">
@@ -108,6 +119,9 @@ function FeatureList({ group }: { group: FeatureGroup }) {
       ))}
       {group.numericFeatures?.map((f) => (
         <NumericSelect key={f.key} feature={f} />
+      ))}
+      {group.subgroups?.map((sg) => (
+        <Subgroup key={sg.label} subgroup={sg} />
       ))}
     </div>
   );

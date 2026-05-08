@@ -13,6 +13,15 @@ import {
   homeFeedLimit,
   hideMixes,
   hideRecommendedCategories,
+  hideLikeDislike,
+  hideSubscribeButton,
+  hideShareButton,
+  hideDownloadButton,
+  hideClipButton,
+  hideSaveButton,
+  hideThanksButton,
+  hideInfoCards,
+  hideDescription,
 } from '@/utils/storage';
 
 export default defineContentScript({
@@ -39,6 +48,15 @@ export default defineContentScript({
       homeFeedLimit: number;
       hideMixes: boolean;
       hideRecommendedCategories: boolean;
+      hideLikeDislike: boolean;
+      hideSubscribeButton: boolean;
+      hideShareButton: boolean;
+      hideDownloadButton: boolean;
+      hideClipButton: boolean;
+      hideSaveButton: boolean;
+      hideThanksButton: boolean;
+      hideInfoCards: boolean;
+      hideDescription: boolean;
     }): string {
       const rules: string[] = [];
 
@@ -215,6 +233,98 @@ export default defineContentScript({
         `);
       }
 
+      if (settings.hideDescription) {
+        rules.push(`
+          ytd-watch-flexy #description,
+          ytd-watch-flexy ytd-text-inline-expander,
+          ytd-watch-flexy #structured-description,
+          ytd-watch-flexy ytd-video-description-header-renderer,
+          ytd-watch-flexy #bottom-row {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideLikeDislike) {
+        rules.push(`
+          segmented-like-dislike-button-view-model,
+          ytd-menu-renderer segmented-like-dislike-button-view-model,
+          ytd-segmented-like-dislike-button-renderer {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideSubscribeButton) {
+        rules.push(`
+          ytd-watch-flexy #subscribe-button,
+          ytd-watch-flexy #subscribe-button-shape,
+          ytd-watch-flexy yt-smartimation:has(#subscribe-button),
+          ytd-watch-flexy ytd-subscription-notification-toggle-button-renderer-next,
+          ytd-watch-flexy #notification-preference-button {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideShareButton) {
+        rules.push(`
+          ytd-menu-renderer #top-level-buttons-computed yt-button-view-model:has(button[aria-label="Share"]) {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideDownloadButton) {
+        rules.push(`
+          ytd-menu-renderer #flexible-item-buttons ytd-download-button-renderer,
+          #below ytd-download-button-renderer {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideClipButton) {
+        rules.push(`
+          ytd-menu-renderer #flexible-item-buttons yt-button-view-model:has(button[aria-label="Clip"]) {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideSaveButton) {
+        rules.push(`
+          ytd-menu-renderer #flexible-item-buttons yt-button-view-model:has(button[aria-label="Save to playlist"]) {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideThanksButton) {
+        rules.push(`
+          ytd-menu-renderer #flexible-item-buttons yt-button-view-model:has(button[aria-label="Thanks"]) {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideInfoCards) {
+        rules.push(`
+          .iv-card,
+          .iv-branding,
+          .ytp-cards-teaser,
+          .ytp-cards-button,
+          .iv-drawer,
+          .iv-card-content,
+          .ytp-ce-channel,
+          .ytp-ce-video,
+          .ytp-ce-playlist,
+          .ytp-cards-teaser-text {
+            display: none !important;
+          }
+        `);
+      }
+
       return rules.join('\n');
     }
 
@@ -234,6 +344,15 @@ export default defineContentScript({
         homeFeedLimit: await homeFeedLimit.getValue(),
         hideMixes: await hideMixes.getValue(),
         hideRecommendedCategories: await hideRecommendedCategories.getValue(),
+        hideLikeDislike: await hideLikeDislike.getValue(),
+        hideSubscribeButton: await hideSubscribeButton.getValue(),
+        hideShareButton: await hideShareButton.getValue(),
+        hideDownloadButton: await hideDownloadButton.getValue(),
+        hideClipButton: await hideClipButton.getValue(),
+        hideSaveButton: await hideSaveButton.getValue(),
+        hideThanksButton: await hideThanksButton.getValue(),
+        hideInfoCards: await hideInfoCards.getValue(),
+        hideDescription: await hideDescription.getValue(),
       };
 
       styleEl.textContent = buildCSS(settings);
@@ -414,6 +533,15 @@ export default defineContentScript({
     homeFeedLimit.watch(() => applySettings());
     hideMixes.watch(() => applySettings());
     hideRecommendedCategories.watch(() => applySettings());
+    hideLikeDislike.watch(() => applySettings());
+    hideSubscribeButton.watch(() => applySettings());
+    hideShareButton.watch(() => applySettings());
+    hideDownloadButton.watch(() => applySettings());
+    hideClipButton.watch(() => applySettings());
+    hideSaveButton.watch(() => applySettings());
+    hideThanksButton.watch(() => applySettings());
+    hideInfoCards.watch(() => applySettings());
+    hideDescription.watch(() => applySettings());
 
     await applySettings();
 

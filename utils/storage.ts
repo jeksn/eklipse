@@ -38,6 +38,42 @@ export const hideCreatorElements = storage.defineItem<boolean>('sync:hideCreator
   fallback: false,
 });
 
+export const hideLikeDislike = storage.defineItem<boolean>('sync:hideLikeDislike', {
+  fallback: false,
+});
+
+export const hideSubscribeButton = storage.defineItem<boolean>('sync:hideSubscribeButton', {
+  fallback: false,
+});
+
+export const hideShareButton = storage.defineItem<boolean>('sync:hideShareButton', {
+  fallback: false,
+});
+
+export const hideDownloadButton = storage.defineItem<boolean>('sync:hideDownloadButton', {
+  fallback: false,
+});
+
+export const hideClipButton = storage.defineItem<boolean>('sync:hideClipButton', {
+  fallback: false,
+});
+
+export const hideSaveButton = storage.defineItem<boolean>('sync:hideSaveButton', {
+  fallback: false,
+});
+
+export const hideThanksButton = storage.defineItem<boolean>('sync:hideThanksButton', {
+  fallback: false,
+});
+
+export const hideInfoCards = storage.defineItem<boolean>('sync:hideInfoCards', {
+  fallback: false,
+});
+
+export const hideDescription = storage.defineItem<boolean>('sync:hideDescription', {
+  fallback: false,
+});
+
 export const hideAISummary = storage.defineItem<boolean>('sync:hideAISummary', {
   fallback: false,
 });
@@ -115,6 +151,15 @@ export const featureGroups: FeatureGroup[] = [
     key: 'video',
     label: 'Video Page',
     features: [
+      { key: 'hideDescription', label: 'Hide Description', storageItem: hideDescription },
+      { key: 'hideLikeDislike', label: 'Hide Like / Dislike', storageItem: hideLikeDislike },
+      { key: 'hideSubscribeButton', label: 'Hide Subscribe Button', storageItem: hideSubscribeButton },
+      { key: 'hideShareButton', label: 'Hide Share Button', storageItem: hideShareButton },
+      { key: 'hideDownloadButton', label: 'Hide Download Button', storageItem: hideDownloadButton },
+      { key: 'hideClipButton', label: 'Hide Clip Button', storageItem: hideClipButton },
+      { key: 'hideSaveButton', label: 'Hide Save Button', storageItem: hideSaveButton },
+      { key: 'hideThanksButton', label: 'Hide Thanks Button', storageItem: hideThanksButton },
+      { key: 'hideInfoCards', label: 'Hide Info Cards', storageItem: hideInfoCards },
       { key: 'hideComments', label: 'Hide Comments', storageItem: hideComments },
       { key: 'hideRelatedSidebar', label: 'Hide Related Sidebar', storageItem: hideRelatedSidebar },
       { key: 'hideEndScreenCards', label: 'Hide End Screen Cards', storageItem: hideEndScreenCards },

@@ -20,6 +20,7 @@ import {
   hideClipButton,
   hideSaveButton,
   hideThanksButton,
+  hideMembershipButton,
   hideInfoCards,
   hideDescription,
 } from '@/utils/storage';
@@ -55,6 +56,7 @@ export default defineContentScript({
       hideClipButton: boolean;
       hideSaveButton: boolean;
       hideThanksButton: boolean;
+      hideMembershipButton: boolean;
       hideInfoCards: boolean;
       hideDescription: boolean;
     }): string {
@@ -246,38 +248,40 @@ export default defineContentScript({
       }
 
       if (settings.hideLikeDislike) {
+        // Targets the segmented like/dislike button in #top-row
         rules.push(`
-          segmented-like-dislike-button-view-model,
-          ytd-menu-renderer segmented-like-dislike-button-view-model,
-          ytd-segmented-like-dislike-button-renderer {
+          #top-row segmented-like-dislike-button-view-model,
+          #top-row ytd-segmented-like-dislike-button-renderer {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideSubscribeButton) {
+        // #subscribe-button and the notification bell sit outside #top-row
         rules.push(`
-          ytd-watch-flexy #subscribe-button,
-          ytd-watch-flexy #subscribe-button-shape,
-          ytd-watch-flexy yt-smartimation:has(#subscribe-button),
-          ytd-watch-flexy ytd-subscription-notification-toggle-button-renderer-next,
-          ytd-watch-flexy #notification-preference-button {
+          #subscribe-button,
+          yt-subscribe-button-view-model,
+          ytd-subscription-notification-toggle-button-renderer-next,
+          #notification-preference-button {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideShareButton) {
+        // Share lives in #top-row as a yt-button-view-model (confirmed via uBlock filters)
         rules.push(`
-          ytd-menu-renderer div#top-level-buttons-computed > yt-button-view-model:has(button[aria-label="Share"]) {
+          #top-row yt-button-view-model:has(button[aria-label="Share"]) {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideDownloadButton) {
+        // Download uses ytd-download-button-renderer inside #top-row
         rules.push(`
-          ytd-menu-renderer div#flexible-item-buttons > ytd-download-button-renderer {
+          #top-row ytd-download-button-renderer {
             display: none !important;
           }
         `);
@@ -285,7 +289,8 @@ export default defineContentScript({
 
       if (settings.hideClipButton) {
         rules.push(`
-          ytd-menu-renderer div#flexible-item-buttons > yt-button-view-model:has(button[aria-label="Clip"]) {
+          #top-row yt-button-view-model:has(button[aria-label="Clip"]),
+          yt-button-view-model.ytd-menu-renderer:has(button[aria-label="Clip"]) {
             display: none !important;
           }
         `);
@@ -293,7 +298,8 @@ export default defineContentScript({
 
       if (settings.hideSaveButton) {
         rules.push(`
-          ytd-menu-renderer div#flexible-item-buttons > yt-button-view-model:has(button[aria-label="Save to playlist"]) {
+          #top-row yt-button-view-model:has(button[aria-label="Save to playlist"]),
+          yt-button-view-model.ytd-menu-renderer:has(button[aria-label="Save to playlist"]) {
             display: none !important;
           }
         `);
@@ -301,7 +307,18 @@ export default defineContentScript({
 
       if (settings.hideThanksButton) {
         rules.push(`
-          ytd-menu-renderer div#flexible-item-buttons > yt-button-view-model:has(button[aria-label="Thanks"]) {
+          #top-row yt-button-view-model:has(button[aria-label="Thanks"]),
+          yt-button-view-model.ytd-menu-renderer:has(button[aria-label="Thanks"]) {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideMembershipButton) {
+        // Join/Membership button has its own dedicated #sponsor-button id
+        rules.push(`
+          #sponsor-button,
+          ytd-sponsor-button-renderer {
             display: none !important;
           }
         `);
@@ -350,6 +367,7 @@ export default defineContentScript({
         hideClipButton: await hideClipButton.getValue(),
         hideSaveButton: await hideSaveButton.getValue(),
         hideThanksButton: await hideThanksButton.getValue(),
+        hideMembershipButton: await hideMembershipButton.getValue(),
         hideInfoCards: await hideInfoCards.getValue(),
         hideDescription: await hideDescription.getValue(),
       };
@@ -539,6 +557,7 @@ export default defineContentScript({
     hideClipButton.watch(() => applySettings());
     hideSaveButton.watch(() => applySettings());
     hideThanksButton.watch(() => applySettings());
+    hideMembershipButton.watch(() => applySettings());
     hideInfoCards.watch(() => applySettings());
     hideDescription.watch(() => applySettings());
 

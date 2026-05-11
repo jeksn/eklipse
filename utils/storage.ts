@@ -66,6 +66,10 @@ export const hideThanksButton = storage.defineItem<boolean>('sync:hideThanksButt
   fallback: false,
 });
 
+export const hideMembershipButton = storage.defineItem<boolean>('sync:hideMembershipButton', {
+  fallback: false,
+});
+
 export const hideInfoCards = storage.defineItem<boolean>('sync:hideInfoCards', {
   fallback: false,
 });
@@ -168,6 +172,7 @@ export const featureGroups: FeatureGroup[] = [
           { key: 'hideClipButton', label: 'Clip', storageItem: hideClipButton },
           { key: 'hideSaveButton', label: 'Save', storageItem: hideSaveButton },
           { key: 'hideThanksButton', label: 'Thanks', storageItem: hideThanksButton },
+          { key: 'hideMembershipButton', label: 'Join / Membership', storageItem: hideMembershipButton },
         ],
       },
       {

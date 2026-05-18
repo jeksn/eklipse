@@ -270,16 +270,17 @@ export default defineContentScript({
       }
 
       if (settings.hideShareButton) {
-        // Share lives in #top-row as a yt-button-view-model (confirmed via uBlock filters)
+        // The share button sits inside <div id="share-button"> within the watch page action row.
+        // Scoped to ytd-watch-metadata to avoid matching the Shorts overlay's share button.
         rules.push(`
-          #top-row yt-button-view-model:has(button[aria-label="Share"]) {
+          ytd-watch-metadata #share-button {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideDownloadButton) {
-        // Download uses ytd-download-button-renderer inside #top-row
+        // Download has its own dedicated element type — language-independent.
         rules.push(`
           #top-row ytd-download-button-renderer {
             display: none !important;
@@ -288,37 +289,46 @@ export default defineContentScript({
       }
 
       if (settings.hideClipButton) {
+        // Clip, Save, and Thanks are all yt-button-view-model inside #flexible-item-buttons.
+        // Clip appears to be the 3rd child; use aria-label with a wildcard to catch localisations.
+        // "Clip" in Swedish is "Klipp"; Thanks is "Tack"; Save is "Spara i spellista"
         rules.push(`
-          #top-row yt-button-view-model:has(button[aria-label="Clip"]),
-          yt-button-view-model.ytd-menu-renderer:has(button[aria-label="Clip"]) {
+          #flexible-item-buttons yt-button-view-model:has(button[aria-label*="Clip"]),
+          #flexible-item-buttons yt-button-view-model:has(button[aria-label*="Klipp"]) {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideSaveButton) {
+        // Save to playlist — Swedish: "Spara i spellista"
         rules.push(`
-          #top-row yt-button-view-model:has(button[aria-label="Save to playlist"]),
-          yt-button-view-model.ytd-menu-renderer:has(button[aria-label="Save to playlist"]) {
+          #flexible-item-buttons yt-button-view-model:has(button[aria-label*="playlist"]),
+          #flexible-item-buttons yt-button-view-model:has(button[aria-label*="spellista"]) {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideThanksButton) {
+        // Thanks — Swedish: "Tack"
         rules.push(`
-          #top-row yt-button-view-model:has(button[aria-label="Thanks"]),
-          yt-button-view-model.ytd-menu-renderer:has(button[aria-label="Thanks"]) {
+          #flexible-item-buttons yt-button-view-model:has(button[aria-label*="Thanks"]),
+          #flexible-item-buttons yt-button-view-model:has(button[aria-label*="Tack"]) {
             display: none !important;
           }
         `);
       }
 
       if (settings.hideMembershipButton) {
-        // Join/Membership button has its own dedicated #sponsor-button id
+        // #sponsor-button covers the video page; the aria-label selector covers
+        // cases where the element is rendered without the id (e.g. some channel layouts)
         rules.push(`
           #sponsor-button,
-          ytd-sponsor-button-renderer {
+          ytd-sponsor-button-renderer,
+          button[aria-label="Join this channel"],
+          yt-button-view-model:has(button[aria-label="Join this channel"]),
+          #top-row yt-button-view-model:has(button[aria-label*="Join"]) {
             display: none !important;
           }
         `);
@@ -423,8 +433,8 @@ export default defineContentScript({
     }
 
     // JavaScript-based Shorts hiding for elements CSS might miss
-    function hideShortsElements() {
-      if (!disableShorts.getValue()) return;
+    async function hideShortsElements() {
+      if (!await disableShorts.getValue()) return;
 
       // Hide reel shelf renderers
       document.querySelectorAll('ytd-reel-shelf-renderer').forEach((el) => {
@@ -530,7 +540,8 @@ export default defineContentScript({
         }, 100);
       });
 
-      shortsObserver.observe(document.body, {
+      const target = document.body ?? document.documentElement;
+      shortsObserver.observe(target, {
         childList: true,
         subtree: true,
       });

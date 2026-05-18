@@ -151,8 +151,26 @@ function SettingsTab() {
   );
 }
 
+function detectTabFromUrl(url: string): TabKey {
+  try {
+    const u = new URL(url);
+    if (u.pathname.startsWith('/watch')) return 'video';
+    if (u.pathname.startsWith('/shorts/')) return 'shorts';
+  } catch {}
+  return 'home';
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState<TabKey>('home');
+  const [tabResolved, setTabResolved] = useState(false);
+
+  useEffect(() => {
+    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+      const url = tabs[0]?.url ?? '';
+      if (url) setActiveTab(detectTabFromUrl(url));
+      setTabResolved(true);
+    });
+  }, []);
 
   const activeGroup = featureGroups.find((g) => g.key === activeTab);
 
@@ -179,7 +197,7 @@ function App() {
       </div>
 
       <div className="tab-content">
-        {activeTab === 'settings' ? (
+        {!tabResolved ? null : activeTab === 'settings' ? (
           <SettingsTab />
         ) : activeGroup ? (
           <FeatureList group={activeGroup} />

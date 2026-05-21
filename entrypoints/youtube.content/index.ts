@@ -432,119 +432,32 @@ export default defineContentScript({
       }
     }
 
-    // JavaScript-based Shorts hiding for elements CSS might miss
-    async function hideShortsElements() {
-      if (!await disableShorts.getValue()) return;
+    // Track URL changes for SPA navigation — redirect away from /shorts if disableShorts is on
+    let lastUrl = location.href;
+    let shortsIntervalId: ReturnType<typeof setInterval> | null = null;
 
-      // Hide reel shelf renderers
-      document.querySelectorAll('ytd-reel-shelf-renderer').forEach((el) => {
-        (el as HTMLElement).style.display = 'none';
-      });
-
-      // Hide shelves with Shorts title
-      document.querySelectorAll('ytd-shelf-renderer').forEach((el) => {
-        const title = el.querySelector('[title]')?.getAttribute('title') || '';
-        const ariaLabel = el.querySelector('[aria-label]')?.getAttribute('aria-label') || '';
-        if (title.toLowerCase().includes('shorts') || ariaLabel.toLowerCase().includes('shorts')) {
-          (el as HTMLElement).style.display = 'none';
-        }
-      });
-
-      // Hide individual Shorts videos
-      document.querySelectorAll('ytd-video-renderer, ytd-compact-video-renderer, ytd-grid-video-renderer').forEach((el) => {
-        const link = el.querySelector('a[href^="/shorts/"]');
-        if (link) {
-          (el as HTMLElement).style.display = 'none';
-        }
-      });
-
-      // Hide rich sections containing Shorts
-      document.querySelectorAll('ytd-rich-section-renderer, ytd-item-section-renderer').forEach((el) => {
-        if (el.querySelector('ytd-reel-shelf-renderer, ytd-rich-shelf-renderer[is-shorts]')) {
-          (el as HTMLElement).style.display = 'none';
-        }
-      });
-
-      // Hide reel item renderers
-      document.querySelectorAll('ytd-reel-item-renderer').forEach((el) => {
-        (el as HTMLElement).style.display = 'none';
-      });
-
-      // Hide grid-shelf-view-model elements containing Shorts
-      document.querySelectorAll('grid-shelf-view-model').forEach((el) => {
-        const hasShortsLink = el.querySelector('a[href^="/shorts/"]');
-        const titleEl = el.querySelector('[title]');
-        const ariaLabelEl = el.querySelector('[aria-label]');
-        const title = titleEl?.getAttribute('title')?.toLowerCase() || '';
-        const ariaLabel = ariaLabelEl?.getAttribute('aria-label')?.toLowerCase() || '';
-        const hasShortsTitle = title.includes('shorts') || ariaLabel.includes('shorts');
-        if (hasShortsLink || hasShortsTitle) {
-          (el as HTMLElement).style.display = 'none';
-          // Also hide the parent ytd-item-section-renderer if present
-          const parentSection = el.closest('ytd-item-section-renderer');
-          if (parentSection) {
-            (parentSection as HTMLElement).style.display = 'none';
-          }
-        }
-      });
-
-      // Hide sidebar Shorts navigation links
-      document.querySelectorAll('ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer, tp-yt-paper-item').forEach((el) => {
-        const link = el.querySelector('a[href="/shorts"], a[title="Shorts"], a[aria-label="Shorts"]');
-        const text = el.textContent?.toLowerCase() || '';
-        const title = el.getAttribute('title')?.toLowerCase() || '';
-        const ariaLabel = el.getAttribute('aria-label')?.toLowerCase() || '';
-        if (link || text.includes('shorts') || title.includes('shorts') || ariaLabel.includes('shorts')) {
-          (el as HTMLElement).style.display = 'none';
-        }
-      });
+    function startShortsInterval() {
+      if (shortsIntervalId !== null) return; // already running
+      shortsIntervalId = setInterval(checkUrlChange, 500);
     }
 
-    // Track URL changes for SPA navigation
-    let lastUrl = location.href;
+    function stopShortsInterval() {
+      if (shortsIntervalId !== null) {
+        clearInterval(shortsIntervalId);
+        shortsIntervalId = null;
+      }
+    }
+
     async function checkUrlChange() {
       const currentUrl = location.href;
       if (currentUrl !== lastUrl) {
         lastUrl = currentUrl;
-        // Check if we navigated to /shorts
         const url = new URL(currentUrl);
         const shortsMatch = url.pathname.match(/^\/shorts\/(.+)$/);
         if (shortsMatch && await disableShorts.getValue()) {
           window.location.replace('https://www.youtube.com/');
         }
       }
-    }
-
-    // Set up mutation observer to catch dynamically loaded Shorts
-    let shortsObserver: MutationObserver | null = null;
-    let shortsHideTimeout: number | null = null;
-    function setupShortsObserver() {
-      if (shortsObserver) return;
-
-      shortsObserver = new MutationObserver((mutations) => {
-        // Only process if mutations contain potentially relevant elements
-        const hasRelevantChanges = mutations.some(m =>
-          Array.from(m.addedNodes).some(node =>
-            node instanceof HTMLElement &&
-            (node.tagName?.includes('YTD-') ||
-             node.tagName?.includes('GRID-') ||
-             node.querySelector?.('ytd-reel-shelf-renderer, ytd-video-renderer, grid-shelf-view-model'))
-          )
-        );
-        if (!hasRelevantChanges) return;
-
-        // Debounce the hiding to avoid interfering with YouTube's rendering
-        if (shortsHideTimeout) clearTimeout(shortsHideTimeout);
-        shortsHideTimeout = window.setTimeout(() => {
-          hideShortsElements();
-        }, 100);
-      });
-
-      const target = document.body ?? document.documentElement;
-      shortsObserver.observe(target, {
-        childList: true,
-        subtree: true,
-      });
     }
 
     hideHomeFeed.watch(() => applySettings());
@@ -576,20 +489,16 @@ export default defineContentScript({
 
     if (await disableShorts.getValue()) {
       handleDisableShortsRedirect();
-      hideShortsElements();
-      setupShortsObserver();
-      // Start checking for URL changes (SPA navigation)
-      setInterval(checkUrlChange, 500);
+      startShortsInterval();
     } else if (await playShortsInNativePlayer.getValue()) {
       handleShortsToNativePlayer();
     }
     disableShorts.watch((value: boolean) => {
       if (value) {
         handleDisableShortsRedirect();
-        hideShortsElements();
-        setupShortsObserver();
-        // Start checking for URL changes (SPA navigation)
-        setInterval(checkUrlChange, 500);
+        startShortsInterval();
+      } else {
+        stopShortsInterval();
       }
     });
     playShortsInNativePlayer.watch(async (value: boolean) => {

@@ -204,8 +204,9 @@ export default defineContentScript({
       }
 
       if (settings.homeFeedLimit > 0) {
+        // CSS hiding for immediate effect (will be removed by JS)
         rules.push(`
-          ytd-browse[page-subtype="home"] ytd-rich-grid-renderer ytd-rich-item-renderer:nth-child(n+${settings.homeFeedLimit + 3}) {
+          ytd-browse[page-subtype="home"] ytd-rich-grid-renderer ytd-rich-item-renderer:nth-child(n+${settings.homeFeedLimit + 1}) {
             display: none !important;
           }
         `);
@@ -270,10 +271,18 @@ export default defineContentScript({
       }
 
       if (settings.hideShareButton) {
-        // The share button sits inside <div id="share-button"> within the watch page action row.
-        // Scoped to ytd-watch-metadata to avoid matching the Shorts overlay's share button.
+        // YouTube has two layouts for the share button:
+        //   Old: ytd-button-renderer wrapping yt-button-shape > button[aria-label=Share/Dela]
+        //   New: yt-button-view-model wrapping button-view-model > button[aria-label=Share/Dela]
+        // Both are inside #top-level-buttons-computed in the watch page action row.
+        // We also keep the legacy #share-button ID as a fallback.
+        // "Dela" is Swedish for "Share".
         rules.push(`
-          ytd-watch-metadata #share-button {
+          ytd-watch-metadata #share-button,
+          #top-level-buttons-computed ytd-button-renderer:has(yt-button-shape > button[aria-label="Share"]),
+          #top-level-buttons-computed ytd-button-renderer:has(yt-button-shape > button[aria-label="Dela"]),
+          #top-level-buttons-computed yt-button-view-model:has(button-view-model > button[aria-label="Share"]),
+          #top-level-buttons-computed yt-button-view-model:has(button-view-model > button[aria-label="Dela"]) {
             display: none !important;
           }
         `);
@@ -384,6 +393,11 @@ export default defineContentScript({
 
       styleEl.textContent = buildCSS(settings);
 
+      // Apply home feed limit via DOM removal
+      if (settings.homeFeedLimit > 0) {
+        applyHomeFeedLimit(settings.homeFeedLimit);
+      }
+
       window.postMessage(
         {
           type: 'eklipse-settings',
@@ -391,6 +405,63 @@ export default defineContentScript({
         },
         '*',
       );
+    }
+
+    // DOM-based home feed limit - removes elements instead of just hiding
+    let homeFeedLimitObserver: MutationObserver | null = null;
+    let currentHomeFeedLimit = 0;
+
+    function applyHomeFeedLimit(limit: number) {
+      currentHomeFeedLimit = limit;
+
+      // Remove excess items immediately
+      removeExcessHomeFeedItems(limit);
+
+      // Set up observer to catch dynamically loaded items
+      setupHomeFeedLimitObserver(limit);
+    }
+
+    function removeExcessHomeFeedItems(limit: number) {
+      const grid = document.querySelector('ytd-browse[page-subtype="home"] ytd-rich-grid-renderer');
+      if (!grid) return;
+
+      const items = grid.querySelectorAll(':scope > ytd-rich-item-renderer');
+      if (items.length > limit) {
+        for (let i = limit; i < items.length; i++) {
+          items[i].remove();
+        }
+      }
+    }
+
+    function setupHomeFeedLimitObserver(limit: number) {
+      if (homeFeedLimitObserver) return;
+
+      const grid = document.querySelector('ytd-browse[page-subtype="home"] ytd-rich-grid-renderer');
+      if (!grid) return;
+
+      homeFeedLimitObserver = new MutationObserver((mutations) => {
+        // Check if new items were added
+        const hasNewItems = mutations.some(m =>
+          Array.from(m.addedNodes).some(node =>
+            node instanceof HTMLElement && node.tagName === 'YTD-RICH-ITEM-RENDERER'
+          )
+        );
+
+        if (hasNewItems) {
+          removeExcessHomeFeedItems(limit);
+        }
+      });
+
+      homeFeedLimitObserver.observe(grid, {
+        childList: true,
+      });
+    }
+
+    function stopHomeFeedLimitObserver() {
+      if (homeFeedLimitObserver) {
+        homeFeedLimitObserver.disconnect();
+        homeFeedLimitObserver = null;
+      }
     }
 
     function handleChannelRedirect() {
@@ -484,6 +555,14 @@ export default defineContentScript({
     hideMembershipButton.watch(() => applySettings());
     hideInfoCards.watch(() => applySettings());
     hideDescription.watch(() => applySettings());
+    homeFeedLimit.watch((value: number) => {
+      applySettings();
+      if (value > 0) {
+        applyHomeFeedLimit(value);
+      } else {
+        stopHomeFeedLimitObserver();
+      }
+    });
 
     await applySettings();
 

@@ -6,11 +6,16 @@ A browser extension that strips away distractions and puts you back in control o
 
 ### Home
 - **Hide Home Feed** — Remove the algorithmic feed entirely so you only watch what you came for
-- **Home Feed Limit** — Limit the number of recommendations on the home page (8, 12, 16, or 24 items)
+- **Home Feed Limit** — Limit the number of recommendations on the home page (8, 12, 16, or 24 items). Also hides the "Show more" button when a limit is set.
 - **Disable Thumbnail Autoplay** — Stop thumbnails from autoplaying video previews on hover
+- **Hide Mixes** — Remove auto-generated mix/radio playlists from the home feed
+- **Hide Recommended Categories** — Remove "Explore more topics" sections, filter chips, and other non-video recommended sections
+- **Hide Members-Only Videos** — Hide videos with "Members only" badges from all feeds
 
 ### Shorts
 - **Disable Shorts** — Completely remove all Shorts UI and redirect `/shorts/` URLs to the homepage
+  - Uses scoped `:has()` selectors that only hide containers actually containing Shorts content, so YouTube's virtual scroller and search rendering stay intact (no reload loops)
+  - Targets modern YouTube elements including `grid-shelf-view-model`, `ytd-rich-grid-group`, and `ytm-shorts-lockup-view-model`
 - **Hide Recommended Shorts** — Remove Shorts shelves and recommendations from feeds
 - **Play Shorts in Native Player** — Automatically redirect Shorts to the standard video player
 

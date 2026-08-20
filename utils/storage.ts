@@ -94,6 +94,10 @@ export const hideRecommendedCategories = storage.defineItem<boolean>('sync:hideR
   fallback: false,
 });
 
+export const hideMembersOnly = storage.defineItem<boolean>('sync:hideMembersOnly', {
+  fallback: false,
+});
+
 export interface FeatureToggle {
   key: string;
   label: string;
@@ -129,6 +133,7 @@ export const featureGroups: FeatureGroup[] = [
       { key: 'disableThumbnailAutoplay', label: 'Disable Thumbnail Autoplay', storageItem: disableThumbnailAutoplay },
       { key: 'hideMixes', label: 'Hide Mixes', storageItem: hideMixes },
       { key: 'hideRecommendedCategories', label: 'Hide Recommended Categories', storageItem: hideRecommendedCategories },
+      { key: 'hideMembersOnly', label: 'Hide Members-Only Videos', storageItem: hideMembersOnly },
     ],
     numericFeatures: [
       { key: 'homeFeedLimit', label: 'Home Feed Limit', storageItem: homeFeedLimit, options: [0, 8, 12, 16, 24] },

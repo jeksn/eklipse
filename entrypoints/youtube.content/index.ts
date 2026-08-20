@@ -13,6 +13,7 @@ import {
   homeFeedLimit,
   hideMixes,
   hideRecommendedCategories,
+  hideMembersOnly,
   hideLikeDislike,
   hideSubscribeButton,
   hideShareButton,
@@ -49,6 +50,7 @@ export default defineContentScript({
       homeFeedLimit: number;
       hideMixes: boolean;
       hideRecommendedCategories: boolean;
+      hideMembersOnly: boolean;
       hideLikeDislike: boolean;
       hideSubscribeButton: boolean;
       hideShareButton: boolean;
@@ -83,53 +85,53 @@ export default defineContentScript({
       }
 
       if (settings.disableShorts) {
+        // CRITICAL: Only hide leaf-level content and shelf-level elements.
+        // NEVER hide structural containers like ytd-rich-section-renderer or
+        // ytd-item-section-renderer — these are used by YouTube's virtual
+        // scroller on the search page. Hiding them causes an infinite reload
+        // loop because YouTube keeps trying to re-render the "missing" nodes.
+        // The empty parent containers will collapse naturally once their
+        // Shorts content children are hidden.
         rules.push(`
-          /* Core Shorts elements */
-          ytd-rich-section-renderer,
-          ytd-reel-shelf-renderer,
-          ytd-rich-shelf-renderer[is-shorts],
-          ytd-shelf-renderer[is-shorts],
-          [is-shorts],
-          [is-shorts="true"],
-          /* Navigation */
+          /* Navigation entries */
           ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+          ytd-guide-entry-renderer:has(a[title="Shorts"]),
           ytd-guide-entry-renderer a[title="Shorts"],
-          a[title="Shorts"],
+          ytd-mini-guide-entry-renderer a[title="Shorts"],
+          a[title="Shorts"][href="/shorts"],
           ytd-tab-shape-renderer[tab-title="Shorts"],
-          /* Hide ALL Shorts shelves by various indicators */
+          /* Reel shelves and items (always Shorts, safe to hide directly) */
           ytd-reel-shelf-renderer,
-          ytd-shelf-renderer:has(> div > ytd-reel-shelf-renderer),
-          ytd-shelf-renderer:has([title*="Shorts"]),
-          ytd-shelf-renderer:has([title*="shorts"]),
-          ytd-shelf-renderer:has([aria-label*="Shorts"]),
-          ytd-shelf-renderer:has([aria-label*="shorts"]),
-          ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
-          ytd-item-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
-          ytd-rich-section-renderer:has(ytd-reel-shelf-renderer),
-          ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
-          /* Search page specific - hide entire sections containing Shorts */
-          ytd-search ytd-reel-shelf-renderer,
-          ytd-search ytd-shelf-renderer:has(ytd-reel-shelf-renderer),
-          ytd-search ytd-shelf-renderer:has([title*="Shorts"]),
-          ytd-search ytd-shelf-renderer:has([title*="shorts"]),
-          ytd-search ytd-rich-section-renderer:has(ytd-reel-shelf-renderer),
-          ytd-search ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
-          ytd-search ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
-          ytd-search ytd-rich-shelf-renderer[is-shorts],
-          /* Grid shelf view model containing Shorts (search results) */
+          ytd-reel-item-renderer,
+          ytm-reel-shelf-renderer,
+          ytm-reel-item-renderer,
+          ytm-shorts-lockup-view-model,
+          /* Rich shelves explicitly marked as Shorts or containing Shorts links */
+          ytd-rich-shelf-renderer[is-shorts],
+          ytd-rich-shelf-renderer:has(a[href^="/shorts/"]),
+          ytd-shelf-renderer[is-shorts],
+          /* Generic shelves wrapping reel content */
+          ytd-shelf-renderer:has(ytd-reel-shelf-renderer),
+          ytd-shelf-renderer:has(ytd-reel-item-renderer),
+          /* Modern grid-based shelves (2024+ search results) */
           grid-shelf-view-model:has(a[href^="/shorts/"]),
-          /* Individual Shorts videos in any context */
+          ytd-rich-grid-group:has(a[href^="/shorts/"]),
+          /* Individual Shorts videos — matched by href, not title, to avoid
+             false positives on normal videos about "shorts" */
           ytd-video-renderer:has(a[href^="/shorts/"]),
           ytd-compact-video-renderer:has(a[href^="/shorts/"]),
           ytd-grid-video-renderer:has(a[href^="/shorts/"]),
           ytd-rich-item-renderer:has(a[href^="/shorts/"]),
-          ytd-reel-item-renderer,
+          ytm-rich-item-renderer:has(a[href^="/shorts/"]),
+          ytm-video-with-context-renderer:has(a[href^="/shorts/"]),
+          ytm-grid-video-renderer:has(a[href^="/shorts/"]),
+          ytd-notification-renderer:has(a[href^="/shorts/"]),
           /* Horizontal lists containing Shorts */
           ytd-horizontal-card-list-renderer:has(a[href^="/shorts/"]),
           ytd-horizontal-card-list-renderer:has(ytd-reel-item-renderer),
-          /* Filter chips */
+          /* Filter chips pointing at Shorts */
           ytd-chip-cloud-chip-renderer:has(a[href*="shorts"]),
-          /* Video renderers marked as shorts */
+          /* Video renderers explicitly flagged as Shorts by YouTube */
           ytd-video-renderer[is-short],
           ytd-video-renderer[data-is-short="true"] {
             display: none !important;
@@ -205,8 +207,12 @@ export default defineContentScript({
 
       if (settings.homeFeedLimit > 0) {
         // CSS hiding for immediate effect (will be removed by JS)
+        // Also hide the "Show more" / reload button since we're capping the feed
         rules.push(`
           ytd-browse[page-subtype="home"] ytd-rich-grid-renderer ytd-rich-item-renderer:nth-child(n+${settings.homeFeedLimit + 1}) {
+            display: none !important;
+          }
+          ytd-browse[page-subtype="home"] ytd-rich-grid-renderer #reload-content {
             display: none !important;
           }
         `);
@@ -225,12 +231,32 @@ export default defineContentScript({
       }
 
       if (settings.hideRecommendedCategories) {
+        // Hide all non-essential recommended sections on the home feed.
+        // ytd-rich-section-renderer elements on the home feed are sections
+        // like "Explore more topics", "Breaking news", Shorts shelves, etc.
+        // The main video grid items (ytd-rich-item-renderer) are direct
+        // children of ytd-rich-grid-renderer, not inside rich sections,
+        // so hiding rich sections does not affect the main feed.
         rules.push(`
           ytd-browse[page-subtype="home"] ytd-feed-nudge-renderer,
           ytd-browse[page-subtype="home"] ytd-rich-shelf-renderer:has(ytd-rich-chip-cloud-renderer),
-          ytd-browse[page-subtype="home"] ytd-rich-section-renderer:has(ytd-rich-shelf-renderer),
+          ytd-browse[page-subtype="home"] ytd-rich-section-renderer,
           ytd-browse[page-subtype="home"] ytd-chip-cloud-renderer,
           ytd-browse[page-subtype="home"] #chips-wrapper {
+            display: none !important;
+          }
+        `);
+      }
+
+      if (settings.hideMembersOnly) {
+        // Hide videos with "Members only" badges across all contexts.
+        // The badge class is language-independent.
+        rules.push(`
+          ytd-rich-item-renderer:has(.badge-style-type-members-only),
+          ytd-compact-video-renderer:has(.badge-style-type-members-only),
+          ytd-grid-video-renderer:has(.badge-style-type-members-only),
+          ytd-video-renderer:has(.badge-style-type-members-only),
+          ytd-rich-grid-media:has(.badge-style-type-members-only) {
             display: none !important;
           }
         `);
@@ -379,6 +405,7 @@ export default defineContentScript({
         homeFeedLimit: await homeFeedLimit.getValue(),
         hideMixes: await hideMixes.getValue(),
         hideRecommendedCategories: await hideRecommendedCategories.getValue(),
+        hideMembersOnly: await hideMembersOnly.getValue(),
         hideLikeDislike: await hideLikeDislike.getValue(),
         hideSubscribeButton: await hideSubscribeButton.getValue(),
         hideShareButton: await hideShareButton.getValue(),
@@ -545,6 +572,7 @@ export default defineContentScript({
     homeFeedLimit.watch(() => applySettings());
     hideMixes.watch(() => applySettings());
     hideRecommendedCategories.watch(() => applySettings());
+    hideMembersOnly.watch(() => applySettings());
     hideLikeDislike.watch(() => applySettings());
     hideSubscribeButton.watch(() => applySettings());
     hideShareButton.watch(() => applySettings());
